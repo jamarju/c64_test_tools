@@ -1,5 +1,7 @@
 # Commodore 64 hardware test tools
 
+![](img/PLA-arduino.jpg)
+
 I wrote these 3 programs to test the RAM, ROM and PLA chips with an Arduino Uno because I don't own a second known-working C64 to test them on.
 
 With the help of these sketches I found my CHAROM and PLA were fried. If you are trying to repair your C64, I hope they help you too and wish you good luck!
