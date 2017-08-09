@@ -1,6 +1,6 @@
 # Commodore 64 hardware test tools
 
-![](img/PLA-arduino.jpg)
+![](img/PLA-arduino.JPG)
 
 I wrote these 3 programs to test the RAM, ROM and PLA chips with an Arduino Uno because I don't own a second known-working C64 to test them on.
 
