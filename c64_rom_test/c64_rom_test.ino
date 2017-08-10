@@ -76,6 +76,7 @@
 
 // UNCOMMENT ROM TO TEST (ONLY ONE AT A TIME!!):
 #define ROM characters_901225_01_bin
+// #define ROM kernal_901227_02_bin
 // #define ROM kernal_901227_03_bin
 // #define ROM basic_901226_01_bin
 
