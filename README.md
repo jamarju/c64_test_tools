@@ -113,6 +113,89 @@ See test details on each sketch's heading comments.
 - Random activity on LED (pin 13): **TEST PASS**
 - A series of _n_ LED flashes: **TEST FAIL** output F<sub>n-1</sub>
 
+## Summary of [ROM dump](c64_rom_dump_mega2560)
+
+The diagram is for a Robotdyn Mega Pro 2560 (smaller factor Arduino Mega clone).
+
+Also works with a real Arduino Mega, just pay attention to the different pin layout.
+
+This is for 2364 (8 KB) ROMs. See sketch comments for 2332 (4 KB) ROMs.
+
+```
+                   +---------------     
+                   | VIN[ ][ ]VIN  \                  
+                   | GND[ ][ ]GND  /                  
+                   |  5V[ ][ ]5V   \                  
+                   | 3V3[ ][ ]3V3  /                  
+                   | RST[ ][ ]AREF \                  
+               E1  |  TX[ ][ ]RX   /  E0
+               E5  |  D3[ ][ ]D2   \  E4
+               E3  |  D5[ ][ ]D4   /  G5
+               H4  |  D7[ ][ ]D6   \  H3
+               H6  |  D9[ ][ ]D8   /  H5
+               B5  | D11[ ][ ]D10  \  B4
+               B7  | D13[ ][ ]D12  /  B6
+               J0  | D15[ ][ ]D14  \  J1
+               H0  | D17[ ][ ]D16  /  H1              
+               D2  | D19[ ][ ]D18  \  D3              
+               D0  | D21[ ][ ]D20  /  D1              
+    ROM A1 --- A1  | D23[ ][ ]D22  \  A0 --- ROM A0
+    ROM A3 --- A3  | D25[ ][ ]D24  /  A2 --- ROM A2
+    ROM A5 --- A5  | D27[ ][ ]D26  \  A4 --- ROM A5
+    ROM A7 --- A7  | D29[ ][ ]D28  /  A6 --- ROM A7
+               C6  | D31[ ][ ]D30  \  C7
+                   +----------------
+```
+```
+                    --+-----+-------+
+                    \ |     |       |
+                    / | USB | [RST] |
+                    \ +-----+       |
+                    /               |
+                    \               |
+    ROM  D1 --- F1  /   A1[ ][ ]A0  |  F0 --- ROM D0
+    ROM  D3 --- F3  \   A3[ ][ ]A2  |  F2 --- ROM D2
+    ROM  D5 --- F5  /   A5[ ][ ]A4  |  F4 --- ROM D4
+    ROM  D7 --- F7  \   A7[ ][ ]A6  |  F6 --- ROM D6
+                K1  /   A9[ ][ ]A8  |  K0
+                K3  \  A11[ ][ ]A10 |  K2
+                K5  /  A13[ ][ ]A12 |  K4
+                K7  \  A15[ ][ ]A14 |  K6
+    ROM A11 --- C4  /  D33[ ][ ]D32 |  C5 --- ROM A12
+    ROM  A9 --- C2  \  D35[ ][ ]D34 |  C3 --- ROM A10
+    ROM  A8 --- C0  /  D37[ ][ ]D36 |  C1 --- ROM A9
+                G2  \  D39[ ][ ]D38 |  D7
+    ROM /CE --- G0  /  D41[ ][ ]D40 |  G1
+                L6  \  D43[ ][ ]D42 |  L7
+                L4  /  D45[ ][ ]D44 |  L5
+                L2  \  D47[ ][ ]D46 |  L3
+                     ---------------+
+```
+
+The program will dump the ROM over to the serial port (115.2 Kbps) and prompt if you want to drive /CE low or high. 
+
+Driving /CE low enables the chip and produces a hex dump you can convert to bin with `xxd -r <dump.txt >dump.bin`:
+
+```
+/CE high or low? [h/l] l
+
+00000000: 27 80 a8 80 c3 c2 cd 38 30 00 40 c0 40 c0 40 c0
+00000010: 40 c0 40 c0 40 c0 40 c0 00 80 80 10 10 10 10 20
+...
+```
+
+Driving /CE high disables the chip and should read `ff` throughout the entire dump:
+
+```
+/CE high or low? [h/l] h
+
+00000000: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+00000010: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+...
+```
+
+A valid dump with /CE high means the chip **FAILS** to obey the /CE line.
+
 ## Thanks
 
  * [Zimmers invaluable archive of pinouts, schematics and documents](http://www.zimmers.net/anonftp/pub/cbm/index.html)
