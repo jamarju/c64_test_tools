@@ -2,15 +2,19 @@
 
 ![](img/PLA-arduino.JPG)
 
-I wrote these 3 programs to test the RAM, ROM and PLA chips with an Arduino Uno because I don't own a second known-working C64 to test them on.
+I wrote these programs to test the RAM, ROM and PLA chips with an Arduino Uno because I don't own a second known-working C64 to test them on.
 
-With the help of these sketches I found my CHAROM and PLA were fried. If you are trying to repair your C64, I hope they help you too and wish you good luck!
+With the help of these sketches I found my CHAROM and PLA were fried. I also was able to find that one of the chips in my International Soccer cartridge was failing to obey the /CS signal. If you are trying to repair your C64, I hope they help you too and wish you good luck!
+
+Some sketches work on an Arduino Uno. Some others require an Arduino MEGA (I actually got a Robotdyn Mega Pro 2560, which is a pin-compatible, smaller factor version of the real Mega). The Arduino MEGA has plenty of pins and makes it easier to test the chips and also provide meaningful information through the serial port.
 
 Check the chips for electrical consistence **before** wiring, ie: inputs are not shorted, chip obeys /CS, etc.
 
 See test details on each sketch's heading comments.
 
-## Summary of [RAM test](c64_dram_test)
+## Summary of [64K x 1 bit RAM test](c64_dram_test)
+
+Test for the 64K x 1 bit chips on long board breadbin C64s and older C64Cs (there are eight of these chips for a total 64 x 8 Kbit).
 
 ```
                                                +-----+
@@ -43,6 +47,74 @@ See test details on each sketch's heading comments.
 - LED (pin 13) off: TEST **PASS**
 - LED (pin 13) on: TEST **FAIL** (will turn back off at the end of the test cycle, so PAY ATTENTION)
 
+## Summary of [64K x 4 bit RAM test (Arduino MEGA)](c64_dram_test_mega2560)
+
+Test for the 64K x 4 bit chips on short board C64Cs (TMS 4464, NEC 41464, etc). There are two of these chips on these boards.
+
+The diagram is for a Robotdyn Mega Pro 2560 (smaller factor Arduino Mega clone).
+
+Also works with a real Arduino Mega, just pay attention to the different pin layout.
+
+```
+                   +---------------
+                   | VIN[ ][ ]VIN  \                  
+                   | GND[ ][ ]GND  /                  
+                   |  5V[ ][ ]5V   \                  
+                   | 3V3[ ][ ]3V3  /                  
+                   | RST[ ][ ]AREF \                  
+               E1  |  TX[ ][ ]RX   /  E0
+               E5  |  D3[ ][ ]D2   \  E4
+               E3  |  D5[ ][ ]D4   /  G5
+               H4  |  D7[ ][ ]D6   \  H3
+               H6  |  D9[ ][ ]D8   /  H5
+               B5  | D11[ ][ ]D10  \  B4
+               B7  | D13[ ][ ]D12  /  B6
+               J0  | D15[ ][ ]D14  \  J1
+               H0  | D17[ ][ ]D16  /  H1              
+               D2  | D19[ ][ ]D18  \  D3              
+               D0  | D21[ ][ ]D20  /  D1              
+    RAM A1 --- A1  | D23[ ][ ]D22  \  A0 --- RAM A0
+    RAM A3 --- A3  | D25[ ][ ]D24  /  A2 --- RAM A2
+    RAM A5 --- A5  | D27[ ][ ]D26  \  A4 --- RAM A5
+    RAM A7 --- A7  | D29[ ][ ]D28  /  A6 --- RAM A7
+               C6  | D31[ ][ ]D30  \  C7
+                   +----------------
+
+                    --+-----+-------+
+                    \ |     |       |
+                    / | USB | [RST] |
+                    \ +-----+       |
+                    /               |
+                    \               |
+    RAM IO2 --- F1  /   A1[ ][ ]A0  |  F0 --- RAM IO1
+    RAM IO4 --- F3  \   A3[ ][ ]A2  |  F2 --- RAM IO3
+                F5  /   A5[ ][ ]A4  |  F4
+                F7  \   A7[ ][ ]A6  |  F6
+                K1  /   A9[ ][ ]A8  |  K0
+                K3  \  A11[ ][ ]A10 |  K2
+                K5  /  A13[ ][ ]A12 |  K4
+                K7  \  A15[ ][ ]A14 |  K6
+                C4  /  D33[ ][ ]D32 |  C5
+   RAM /RAS --- C2  \  D35[ ][ ]D34 |  C3 --- RAM /CAS
+    RAM /OE --- C0  /  D37[ ][ ]D36 |  C1 --- RAM /WE
+                G2  \  D39[ ][ ]D38 |  D7
+                G0  /  D41[ ][ ]D40 |  G1
+                L6  \  D43[ ][ ]D42 |  L7
+                L4  /  D45[ ][ ]D44 |  L5
+                L2  \  D47[ ][ ]D46 |  L3
+                     ---------------+
+```
+
+Sample serial output (115200 bps):
+
+```
+1111... PASS
+0000... PASS
+0101... PASS
+1010... PASS
+1111... PASS
+0000... PASS
+```
 
 ##  Summary of [ROM test](c64_rom_test)
 
@@ -113,13 +185,13 @@ See test details on each sketch's heading comments.
 - Random activity on LED (pin 13): **TEST PASS**
 - A series of _n_ LED flashes: **TEST FAIL** output F<sub>n-1</sub>
 
-## Summary of [ROM dump](c64_rom_dump_mega2560)
+## Summary of [ROM dump (Arduino MEGA)](c64_rom_dump_mega2560)
 
 The diagram is for a Robotdyn Mega Pro 2560 (smaller factor Arduino Mega clone).
 
 Also works with a real Arduino Mega, just pay attention to the different pin layout.
 
-This is for 2364 (8 KB) ROMs. See sketch comments for 2332 (4 KB) ROMs.
+This is for 2364 (8 KB) ROMs commonly used for cartridges, BASIC and KERNAL ROMs. See sketch comments for 2332 (4 KB) ROMs.
 
 ```
                    +---------------     
@@ -172,7 +244,7 @@ This is for 2364 (8 KB) ROMs. See sketch comments for 2332 (4 KB) ROMs.
                      ---------------+
 ```
 
-The program will dump the ROM over to the serial port (115.2 Kbps) and prompt if you want to drive /CE low or high. 
+The program will prompt whether you want to drive /CE low or high and then dump the ROM over to the serial port (115.2 Kbps). 
 
 Driving /CE low enables the chip and produces a hex dump you can convert to bin with `xxd -r <dump.txt >dump.bin`:
 
