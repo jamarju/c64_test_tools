@@ -115,7 +115,7 @@ w(uint8_t row, uint8_t col, uint8_t v)
     SETB(PORTC, nRAS);                                // RAS up
     SETB(PORTC, nCAS);                                // CAS up
     DDRF &= 0b11110000;                               // Set I/Ox as INPUT again
-    PORTF &= 0b11110000;                              // ... no pull-ups
+    PORTF |= 0b00001111;                              // keep pull-ups
 }
 
 inline uint8_t
