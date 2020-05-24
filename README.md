@@ -176,7 +176,7 @@ Sample serial output (115200 bps):
  PLA F0/4 --- C2  | [ ]A2     +---+           INT1/3[ ]~|   .
  PLA F1/5 --- C3  | [ ]A3                     INT0/2[ ] |   .
  PLA F2/6 --- C4  | [ ]A4/SDA  RST SCK MISO     TX>1[ ] |   .
- PLA F2/7 --- C5  | [ ]A5/SCL  [ ] [ ] [ ]      RX<0[ ] |   D0 --- PLA I0
+ PLA F3/7 --- C5  | [ ]A5/SCL  [ ] [ ] [ ]      RX<0[ ] |   D0 --- PLA I0
                   |            [ ] [ ] [ ]              |
                   |  UNO_R3    GND MOSI 5V  ____________/
                   \_______________________/
