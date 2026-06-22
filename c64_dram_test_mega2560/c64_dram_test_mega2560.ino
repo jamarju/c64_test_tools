@@ -93,7 +93,23 @@
 #define CLRB(port, b)  port &= ~_BV(b)
 #define ISSET(port, b) ((port & _BV(b)) != 0)
 
-uint32_t prng_state;
+uint32_t prng_state = 0; // initialized at runtime
+
+/*
+ * A union to hold the pre-computed PRNG data for the test
+ * loop.  This allows the Arduino to do a prng test without
+ * violating refresh timing.  We have 4kb of data but split
+ * it into 8k of nybbles at test time.  This gets a new set
+ * of values each time test_rand() is run.  Note: prng() is
+ * changed to be uint32_t now.
+ */
+#define PRNG_DATA_SIZE 1024
+typedef union {
+    uint32_t u32[PRNG_DATA_SIZE];
+    uint8_t  b[PRNG_DATA_SIZE*4];
+} prng_bytes;
+
+prng_bytes prng_data;
 
 /* Not sure what's wrong with Arduino but you MUST split the return type 
  * and function name in separate lines or you'll get weird compiler errors
@@ -139,15 +155,25 @@ r(uint8_t row, uint8_t col)
     return v;
 }
 
-inline uint8_t
+inline uint32_t
 prng()
 {
   uint32_t x = prng_state;
   x ^= x << 13;
-  x ^= x << 17;
+  x ^= x >> 17;
   x ^= x << 5;
   prng_state = x;
-  return x & 0xff;
+  return x;
+}
+
+void
+fill_prng_data()
+{
+  if (!prng_state) // can't be zero!
+	  prng_state = micros() + 0xbadcafe;
+
+  for (int i = 0; i < PRNG_DATA_SIZE; i++)
+    prng_data.u32[i] = prng();
 }
 
 void
@@ -287,27 +313,38 @@ test_10() {
 int
 test_rand() {
   uint8_t col = 0, row = 0;
-  uint32_t seed = micros();
+  uint8_t v = 0;
+  unsigned pos = 0;
 
-  // Write
-  prng_state = seed;
+  // Fill prng_data from xorshift32() routine
+  fill_prng_data();
+
+  // Write the data in nybbles
   do {
     do {
-      w(row, col, prng() & 0b1111);
+      w(row, col, prng_data.b[pos] & 0xf);
       row++;    
+      w(row, col, prng_data.b[pos] >> 4);
+      row++;
+      pos++;  if (pos >= PRNG_DATA_SIZE*4) pos = 0;
     } while (row);
     col++;
   } while (col);
 
-  // Verify
-  prng_state = seed;
+  // Verify what was written
+  pos = 0;
   do {
     do {
-      if (r(row, col) != (prng() & 0b1111)) return 0;
+      v = prng_data.b[pos];
+      if (r(row, col) != (v & 0xf)) return 0;
       row++;
+      if (r(row, col) != (v >> 4)) return 0;
+      row++;
+      pos++;  if (pos >= PRNG_DATA_SIZE*4) pos = 0;
     } while (row);
     col++;
   } while (col);
+
   return 1;
 }
 
@@ -319,8 +356,7 @@ loop() {
   test_and_print("0000", test_0);
   test_and_print("0101", test_01);
   test_and_print("1010", test_10);
-  // TODO: minimum row refresh cycle of 4 ms can't be guaranteed with the current RNG, let's not do this
-  // test_and_print("rand", test_rand); 
+  test_and_print("rand", test_rand); // new version of function 
   // Print a count of how many times we've been through the loop
   Serial.print("Test loops: ");
   Serial.println(++loop_count);
