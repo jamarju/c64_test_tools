@@ -144,7 +144,7 @@ prng()
 {
   uint32_t x = prng_state;
   x ^= x << 13;
-  x ^= x << 17;
+  x ^= x >> 17;
   x ^= x << 5;
   prng_state = x;
   return x & 0xff;
